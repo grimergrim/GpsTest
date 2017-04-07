@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GpsTest</string>
+    <string name="action_settings">Settings</string>
+    <string name="notification_title">Test GPS tracking</string>
+    <string name="notification_message">Running...</string>
+    <string name="ticker_text">Ticker text</string>
+</resources>
