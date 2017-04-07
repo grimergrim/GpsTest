@@ -6,37 +6,22 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 public class GpsTrackingService extends Service {
 
     private static final int ONGOING_NOTIFICATION_ID = 15111984;
-
-//    private Thread mThread;
     private GpsCoordinatesProvider mGpsCoordinatesProvider;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("== tracking service ==", "onCreate");
         mGpsCoordinatesProvider = new GpsCoordinatesProvider(this.getApplicationContext());
         mGpsCoordinatesProvider.connect();
-//        mThread = new Thread("GPS tracking mThread") {
-//            @Override
-//            public void run() {
-//                trackGps();
-//            }
-//        };
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(ONGOING_NOTIFICATION_ID, buildNotification());
-
-//        if (mThread != null && !mThread.isAlive()) {
-//            mThread.start();
-//            startForeground(ONGOING_NOTIFICATION_ID, buildNotification());
-//        }
         return START_REDELIVER_INTENT;
     }
 
@@ -48,25 +33,10 @@ public class GpsTrackingService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e("== tracking service ==", "onDestroy");
-//        if (mThread != null && !mThread.isInterrupted()) {
-//            mThread.interrupt();
-//        }
         if (mGpsCoordinatesProvider != null)
             mGpsCoordinatesProvider.disconnect();
         super.onDestroy();
     }
-
-//    private void trackGps() {
-//        while (true) {
-//            Log.e("== tracking service ==", "Running. Time: " + System.currentTimeMillis());
-//            try {
-//                Thread.sleep(3 * 1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
     private Notification buildNotification() {
         Intent notificationIntent = new Intent(this, MainActivity.class);

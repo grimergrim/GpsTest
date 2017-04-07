@@ -47,14 +47,16 @@ class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks, Goo
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-            startLocationUpdates();
+        startLocationUpdates();
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        //TODO make some logic to stop updating location
         mLastLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        DataSaver.saveLocationAndTime(mLastUpdateTime, mLastLocation.getLongitude(), mLastLocation.getLatitude());
+        SaveDataTask saveDataTask = new SaveDataTask();
+        saveDataTask.execute(new Entity(mLastLocation.getLongitude(), mLastLocation.getLatitude(), mLastUpdateTime));
     }
 
     @Override
