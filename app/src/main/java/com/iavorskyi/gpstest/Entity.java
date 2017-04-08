@@ -1,18 +1,18 @@
 package com.iavorskyi.gpstest;
 
-public class Entity {
+class Entity {
 
     private double longitude;
     private double latitude;
     private String time;
 
-    public Entity(double longitude, double latitude, String time) {
+    Entity(double longitude, double latitude, String time) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.time = time;
     }
 
-    public double getLongitude() {
+    double getLongitude() {
         return longitude;
     }
 
@@ -20,7 +20,7 @@ public class Entity {
         this.longitude = longitude;
     }
 
-    public double getLatitude() {
+    double getLatitude() {
         return latitude;
     }
 
@@ -28,7 +28,7 @@ public class Entity {
         this.latitude = latitude;
     }
 
-    public String getTime() {
+    String getTime() {
         return time;
     }
 

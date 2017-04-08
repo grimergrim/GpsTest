@@ -17,13 +17,15 @@ import com.google.android.gms.location.LocationServices;
 import java.text.DateFormat;
 import java.util.Date;
 
-class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+
+    private final static int UPDATE_INTERVAL = 10000;
+    private final static int FASTEST_UPDATE_INTERVAL = 5000;
 
     private Context mContext;
     private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
     private LocationRequest mLocationRequest;
-    private String mLastUpdateTime;
 
     GpsCoordinatesProvider(Context context) {
         mContext = context;
@@ -53,10 +55,9 @@ class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks, Goo
     @Override
     public void onLocationChanged(Location location) {
         //TODO make some logic to stop updating location
-        mLastLocation = location;
-        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         SaveDataTask saveDataTask = new SaveDataTask();
-        saveDataTask.execute(new Entity(mLastLocation.getLongitude(), mLastLocation.getLatitude(), mLastUpdateTime));
+        saveDataTask.execute(new Entity(location.getLongitude(), location.getLatitude(), mLastUpdateTime));
     }
 
     @Override
@@ -76,22 +77,17 @@ class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks, Goo
                 && ActivityCompat.checkSelfPermission(
                 mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        } else {
-            getGpsPermission();
+            LocationServices.FusedLocationApi
+                    .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
 
     private LocationRequest createLocationRequest() {
         LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return mLocationRequest;
-    }
-
-    private void getGpsPermission() {
-        //TODO implement
     }
 
 }

@@ -13,9 +13,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        Intent intent = new Intent(this, GpsTrackingService.class);
-        startService(intent);
+        if (checkPermissions()) {
+            Intent intent = new Intent(this, GpsTrackingService.class);
+            startService(intent);
+        }
         finish();
+    }
+
+    public boolean checkPermissions() {
+        //TODO implement. Check gps and write storage permissions
+        return true;
     }
 
 }
