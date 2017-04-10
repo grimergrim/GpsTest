@@ -1,4 +1,4 @@
-package com.iavorskyi.gpstest;
+package com.iavorskyi.gpstest.services;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -6,6 +6,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+
+import com.iavorskyi.gpstest.R;
+import com.iavorskyi.gpstest.gps.GpsCoordinatesProvider;
+import com.iavorskyi.gpstest.ui.MainActivity;
 
 public class GpsTrackingService extends Service {
 
@@ -22,7 +26,7 @@ public class GpsTrackingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(ONGOING_NOTIFICATION_ID, buildNotification());
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     @Nullable
@@ -39,6 +43,7 @@ public class GpsTrackingService extends Service {
     }
 
     private Notification buildNotification() {
+        //TODO make cool notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         return new Notification.Builder(this)

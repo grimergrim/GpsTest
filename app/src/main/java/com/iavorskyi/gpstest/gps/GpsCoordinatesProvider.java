@@ -1,6 +1,7 @@
-package com.iavorskyi.gpstest;
+package com.iavorskyi.gpstest.gps;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -13,22 +14,32 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.iavorskyi.gpstest.entities.GpsEntity;
+import com.iavorskyi.gpstest.services.SendingService;
+import com.iavorskyi.gpstest.tasks.SaveDataTask;
+import com.iavorskyi.gpstest.utils.FileUtils;
+import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
 
-import java.text.DateFormat;
-import java.util.Date;
-
-class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
+public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private final static int UPDATE_INTERVAL = 10000;
-    private final static int FASTEST_UPDATE_INTERVAL = 5000;
-
+    private final static int SEND_TO_SERVER_INTERVAL = 1000 * 60 * 2;
+    private final static int UPDATE_INTERVAL = 1000 * 10;
+    private final static int FASTEST_UPDATE_INTERVAL = 1000 * 5;
+    private final static int SEND_COUNTER_MAX_VALUE = SEND_TO_SERVER_INTERVAL / UPDATE_INTERVAL;
+    private int counter = 0;
+    private Location mLastLocation;
+    private FileUtils mFileUtils;
+    private TimeAndDateUtils mTimeAndDateUtils;
     private Context mContext;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
-    GpsCoordinatesProvider(Context context) {
+    public GpsCoordinatesProvider(Context context) {
         mContext = context;
+        mFileUtils = new FileUtils();
+        mTimeAndDateUtils = new TimeAndDateUtils();
+        mLastLocation = new Location("Fake provider");
         mGoogleApiClient = new GoogleApiClient.Builder(mContext)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -37,12 +48,12 @@ class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
         mLocationRequest = createLocationRequest();
     }
 
-    void connect() {
+    public void connect() {
         if (mGoogleApiClient != null)
             mGoogleApiClient.connect();
     }
 
-    void disconnect() {
+    public void disconnect() {
         if (mGoogleApiClient != null)
             mGoogleApiClient.disconnect();
     }
@@ -54,20 +65,33 @@ class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
 
     @Override
     public void onLocationChanged(Location location) {
-        //TODO make some logic to stop updating location
-        String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        SaveDataTask saveDataTask = new SaveDataTask();
-        saveDataTask.execute(new Entity(location.getLongitude(), location.getLatitude(), mLastUpdateTime));
+        if (mLastLocation.getLongitude() != location.getLongitude()
+                && mLastLocation.getLatitude() != location.getLatitude()) {
+            SaveDataTask saveDataTask = new SaveDataTask();
+            saveDataTask.execute(new GpsEntity(location));
+            counter++;
+            if (counter >= SEND_COUNTER_MAX_VALUE) {
+                mContext.startService(new Intent(mContext, SendingService.class));
+                counter = 0;
+            }
+        }
+
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        if (mFileUtils != null && mTimeAndDateUtils != null) {
+            mFileUtils.writeErrorToFile(mTimeAndDateUtils.getDateAsStringFromSystemTime(System
+                    .currentTimeMillis()), "connection to gps suspended", this.getClass().toString());
+        }
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        if (mFileUtils != null && mTimeAndDateUtils != null) {
+            mFileUtils.writeErrorToFile(mTimeAndDateUtils.getDateAsStringFromSystemTime(System
+                    .currentTimeMillis()), "connection to gps failed", this.getClass().toString());
+        }
     }
 
     private void startLocationUpdates() {

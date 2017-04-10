@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">GpsTest</string>
     <string name="action_settings">Settings</string>
-    <string name="notification_title">Test GPS tracking</string>
-    <string name="notification_message">Running...</string>
-    <string name="ticker_text">Ticker text</string>
+    <string name="notification_title">Tracking GPS</string>
+    <string name="notification_message">We are working here!</string>
+    <string name="ticker_text">Tracking started</string>
+    <string name="sending_notification_title">Sending coordinates</string>
+    <string name="sending_notification_message">We are working here!</string>
+    <string name="sending_ticker_text">Trying to send coordinates to server</string>
 </resources>
