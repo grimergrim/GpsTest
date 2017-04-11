@@ -9,16 +9,22 @@ import android.support.annotation.Nullable;
 
 import com.iavorskyi.gpstest.R;
 import com.iavorskyi.gpstest.gps.GpsCoordinatesProvider;
+import com.iavorskyi.gpstest.tasks.LoginTask;
 import com.iavorskyi.gpstest.ui.MainActivity;
 
 public class GpsTrackingService extends Service {
 
+    private static final String LOGIN = "297";
+    private static final String PASSWORD = "297";
     private static final int ONGOING_NOTIFICATION_ID = 15111984;
     private GpsCoordinatesProvider mGpsCoordinatesProvider;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        LoginTask loginTask = new LoginTask();
+        loginTask.setContext(getApplicationContext());
+        loginTask.execute(LOGIN, PASSWORD);
         mGpsCoordinatesProvider = new GpsCoordinatesProvider(this.getApplicationContext());
         mGpsCoordinatesProvider.connect();
     }

@@ -1,13 +1,14 @@
 package com.iavorskyi.gpstest.tasks;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.iavorskyi.gpstest.entities.GpsEntity;
 import com.iavorskyi.gpstest.factory.RetrofitGenerator;
-import com.iavorskyi.gpstest.rest.GpsApi;
+import com.iavorskyi.gpstest.rest.HttpApi;
 import com.iavorskyi.gpstest.rest.json.BaseResponse;
-import com.iavorskyi.gpstest.rest.json.SaveCoordinatesRequest;
+import com.iavorskyi.gpstest.rest.json.SendCoordinatesRequest;
 import com.iavorskyi.gpstest.services.SendingFinishedListener;
 import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
@@ -21,19 +22,26 @@ import java.util.Set;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class SendCoordinatesTask extends AsyncTask<GpsEntity, Void, Boolean> {
+public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
 
     private FileUtils mFileUtils = new FileUtils();
     private SendingFinishedListener mSendingFinishedListener;
+    private Context mContext;
 
-    protected Boolean doInBackground(GpsEntity... entities) {
-        return sendDateToServer(mFileUtils.readFileToSend());
+    protected Boolean doInBackground(Void... params) {
+        Map<String, List<GpsEntity>> map = mFileUtils.readFileToSend();
+        boolean sendDateToServer = sendDateToServer(map);
+        return sendDateToServer;
     }
 
     protected void onPostExecute(Boolean result) {
         Log.e("=============", "task on post: " + result);
         if (mSendingFinishedListener != null)
             mSendingFinishedListener.sendingFinished();
+    }
+
+    public void setContext(Context context) {
+        this.mContext = context;
     }
 
     public void setListener(SendingFinishedListener listener) {
@@ -46,34 +54,43 @@ public class SendCoordinatesTask extends AsyncTask<GpsEntity, Void, Boolean> {
             Set<String> keySet = entities.keySet();
             for (String fileName : keySet) {
                 if (entities.size() > 0) {
-                    List<SaveCoordinatesRequest> saveCoordinatesRequestList = new ArrayList<>();
+                    List<SendCoordinatesRequest> sendCoordinatesRequestList = new ArrayList<>();
                     for (GpsEntity gpsEntity : entities.get(fileName)) {
-                        SaveCoordinatesRequest saveCoordinatesRequest = new SaveCoordinatesRequest(gpsEntity);
-                        saveCoordinatesRequestList.add(saveCoordinatesRequest);
+                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity);
+                        sendCoordinatesRequestList.add(sendCoordinatesRequest);
                     }
-                    if (saveCoordinatesRequestList.size() > 0) {
-                        GpsApi gpsApi = RetrofitGenerator.getRetrofit();
-                        Call<BaseResponse> sendGeoParametersCall = gpsApi.sendGeoParameters(saveCoordinatesRequestList);
-                        try {
-                            Response<BaseResponse> response = sendGeoParametersCall.execute();
-                            if (response != null && response.isSuccessful() && response.body().isSuccess()) {
-                                mFileUtils.deleteSandedData(fileName);
-                                mFileUtils.writeThatDataWasSanded(fileName);
-                                return true;
-                            } else {
-                                if (response != null) {
-                                    new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
-                                            System.currentTimeMillis()), "sending coordinates failed", response.errorBody().toString());
-                                }
-                            }
-                        } catch (IOException e) {
-                            new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
-                                    System.currentTimeMillis()), "sending coordinates failed with exception", e.getMessage());
-                            e.printStackTrace();
-                        }
+                    if (sendCoordinatesRequestList.size() > 0) {
+                        return makeCall(fileName, sendCoordinatesRequestList);
                     }
                 }
             }
+        }
+        return false;
+    }
+
+    private boolean makeCall(String fileName, List<SendCoordinatesRequest> sendCoordinatesRequestList) {
+        HttpApi httpApi = RetrofitGenerator.getRetrofit(mContext);
+        if (httpApi != null) {
+            Call<BaseResponse> sendGeoParametersCall = httpApi.sendGeoParameters(sendCoordinatesRequestList);
+            try {
+                Response<BaseResponse> response = sendGeoParametersCall.execute();
+                if (response != null && response.isSuccessful() && response.body().isSuccess()) {
+                    mFileUtils.deleteSandedData(fileName);
+                    mFileUtils.writeThatDataWasSanded(fileName);
+                    return true;
+                } else {
+                    if (response != null) {
+                        new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
+                                System.currentTimeMillis()), "sending coordinates failed", response.errorBody().toString());
+                    }
+                }
+            } catch (IOException e) {
+                new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
+                        System.currentTimeMillis()), "sending coordinates failed with exception", e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            //TODO report error
         }
         return false;
     }

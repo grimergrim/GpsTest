@@ -1,6 +1,7 @@
 package com.iavorskyi.gpstest.utils;
 
 import android.os.Environment;
+import android.util.Log;
 
 import com.iavorskyi.gpstest.entities.GpsEntity;
 
@@ -24,11 +25,11 @@ public class FileUtils {
     private final static String REPORTS_FOLDER_NAME = "reports";
     private final static String SUCCESS_FILE_NAME = "success.txt";
     private final static String ERRORS_FILE_NAME = "errors.txt";
-    private final static String TIME = "time: ";
-    private final static String LATITUDE = " lat: ";
-    private final static String LONGITUDE = " lon: ";
-    private final static String ACCURACY = " accuracy: ";
-    private final static String SPEED = " speed: ";
+    private final static String TIME = "time:";
+    private final static String LATITUDE = ";lat:";
+    private final static String LONGITUDE = ";lon:";
+    private final static String ACCURACY = ";accuracy:";
+    private final static String SPEED = ";speed:";
 
     private TimeAndDateUtils mTimeAndDateUtils;
 
@@ -42,17 +43,17 @@ public class FileUtils {
                 + MAIN_FOLDER_NAME, COORDINATES_FOLDER);
         if (directoryWithCoordinates.exists()) {
             File[] listFiles = directoryWithCoordinates.listFiles();
-            for (int i = 0; i < listFiles.length; i++) {
+            for (int i = 0; i < listFiles.length - 1; i++) {
                 File file = listFiles[i];
                 List<GpsEntity> gpsEntityList = readGpsEntitiesFromFile(file);
-                //TODO add fileName
-                gpsEntityMap.put("", gpsEntityList);
+                gpsEntityMap.put(file.getName(), gpsEntityList);
             }
         }
         return gpsEntityMap;
     }
 
     private List<GpsEntity> readGpsEntitiesFromFile(File file) {
+        Log.e("=============", "start reading file");
         FileInputStream fileInputStream;
         List<GpsEntity> gpsEntityList = new ArrayList<>();
         try {
@@ -60,19 +61,38 @@ public class FileUtils {
             BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream));
             String line;
             while ((line = reader.readLine()) != null) {
-                //TODO convert to GpsEntity
-                System.out.println(line);
+                GpsEntity gpsEntity = new GpsEntity();
+                String[] params = line.split(";");
+                for (String param : params) {
+                    String[] parameter = param.split(":");
+                    String key = parameter[0];
+                    switch (key) {
+                        case "lat": gpsEntity.setLatitude(Double.valueOf(parameter[1]));
+                            break;
+                        case "lon": gpsEntity.setLongitude(Double.valueOf(parameter[1]));
+                            break;
+                        case "speed": gpsEntity.setSpeed(Double.valueOf(parameter[1]));
+                            break;
+                        case "time": gpsEntity.setTime(Long.valueOf(parameter[1]));
+                            break;
+                        case "accuracy": gpsEntity.setAccuracy(Double.valueOf(parameter[1]));
+                            break;
+                    }
+                }
+                gpsEntityList.add(gpsEntity);
             }
             reader.close();
             fileInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.e("=============", "stop reading file");
         return gpsEntityList;
     }
 
 
     public void writeErrorToFile(String time, String errorText, String details) {
+        //TODO add gsm and gps accuracy and other from amt project
         PrintWriter out = null;
         try {
             File path = new File(Environment.getExternalStorageDirectory() + "/"

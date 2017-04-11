@@ -10,6 +10,9 @@ public class GpsEntity {
     private double accuracy;
     private double speed;
 
+    public GpsEntity() {
+    }
+
     public GpsEntity(Location location) {
         this.longitude = location.getLongitude();
         this.latitude = location.getLatitude();

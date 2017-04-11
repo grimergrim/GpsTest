@@ -31,6 +31,7 @@ public class SendingService extends Service implements SendingFinishedListener{
         if (new InternetUtils(getApplicationContext()).isInternetConnected()) {
             SendCoordinatesTask sendCoordinatesTask = new SendCoordinatesTask();
             sendCoordinatesTask.setListener(this);
+            sendCoordinatesTask.setContext(getApplicationContext());
             sendCoordinatesTask.execute();
         } else {
             Log.e("=============", "error");

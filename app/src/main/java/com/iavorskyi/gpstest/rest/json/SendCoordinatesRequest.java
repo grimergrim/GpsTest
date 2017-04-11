@@ -6,7 +6,7 @@ import com.iavorskyi.gpstest.entities.GpsEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SaveCoordinatesRequest {
+public class SendCoordinatesRequest {
 
     @SerializedName("Latitude")
     private Double latitude;
@@ -31,7 +31,7 @@ public class SaveCoordinatesRequest {
     @SerializedName("Phones")
     private List<String> phonesRequest = new ArrayList<>();
 
-    public SaveCoordinatesRequest(GpsEntity gpsEntity) {
+    public SendCoordinatesRequest(GpsEntity gpsEntity) {
         //TODO remove hardcode later
         userId = "3C4814A2-BB3C-4A87-BBA0-075404A5DC4A";
         transportId = 34731;
