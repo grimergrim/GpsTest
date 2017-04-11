@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Base64;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -60,7 +59,7 @@ public class RetrofitGenerator {
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
 
         long SERVICE_TIMEOUT = 30L; //seconds
-        Log.e("=============", "Creating retrofir with token" + token);
+//        Log.e("=============", "Creating retrofir with token" + token);
         OkHttpClient okHttpClient = okHttpBuilder.addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -102,9 +101,9 @@ public class RetrofitGenerator {
         }
         String encodedString = Base64.encodeToString(data, Base64.DEFAULT);
         String result = ("token " + encodedString).replace("\n", "").replace("\r", "").trim();
-        Log.e("=============", "authHeader " + authHeader);
-        Log.e("=============", "authEncoded " + encodedString);
-        Log.e("=============", "result " + result);
+//        Log.e("=============", "authHeader " + authHeader);
+//        Log.e("=============", "authEncoded " + encodedString);
+//        Log.e("=============", "result " + result);
         return result;
     }
 

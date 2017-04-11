@@ -13,7 +13,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,10 +46,14 @@ public class FileUtils {
                 + MAIN_FOLDER_NAME, COORDINATES_FOLDER);
         if (directoryWithCoordinates.exists()) {
             File[] listFiles = directoryWithCoordinates.listFiles();
-            for (int i = 0; i < listFiles.length - 1; i++) {
-                File file = listFiles[i];
-                List<GpsEntity> gpsEntityList = readGpsEntitiesFromFile(file);
-                gpsEntityMap.put(file.getName(), gpsEntityList);
+            if (listFiles.length > 1) {
+                String latestFileFileName = getLatestFileFileName(listFiles);
+                for (File file : listFiles) {
+                    if (!latestFileFileName.equals(file.getName())) {
+                        List<GpsEntity> gpsEntityList = readGpsEntitiesFromFile(file);
+                        gpsEntityMap.put(file.getName(), gpsEntityList);
+                    }
+                }
             }
         }
         return gpsEntityMap;
@@ -72,7 +79,7 @@ public class FileUtils {
                             break;
                         case "speed": gpsEntity.setSpeed(Double.valueOf(parameter[1]));
                             break;
-                        case "time": gpsEntity.setTime(Long.valueOf(parameter[1]));
+                        case "time": gpsEntity.setTime(parameter[1]);
                             break;
                         case "accuracy": gpsEntity.setAccuracy(Double.valueOf(parameter[1]));
                             break;
@@ -88,6 +95,34 @@ public class FileUtils {
         return gpsEntityList;
     }
 
+    private String getLatestFileFileName(File[] listFiles) {
+        String fileName = "";
+        if (listFiles.length > 0 && listFiles[0] != null) {
+            fileName = listFiles[0].getName();
+            for (File file : listFiles) {
+                if (isFirstNameOlder(file.getName(), fileName)) {
+                    fileName = file.getName();
+                }
+            }
+        }
+        return fileName;
+    }
+
+    private boolean isFirstNameOlder(String newFileName, String oldFileName) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
+        Date newDate = new Date();
+        Date oldDate = new Date();
+        try {
+            newDate = dateFormat.parse(newFileName);
+            oldDate = dateFormat.parse(oldFileName);
+
+        } catch (ParseException e) {
+            //TODO report error
+            e.printStackTrace();
+        }
+        Log.e("=============", "compare dates: " + newFileName + " " + oldFileName);
+        return newDate.getTime() > oldDate.getTime();
+    }
 
     public void writeErrorToFile(String time, String errorText, String details) {
         //TODO add gsm and gps accuracy and other from amt project

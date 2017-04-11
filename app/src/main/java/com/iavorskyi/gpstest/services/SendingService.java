@@ -37,6 +37,7 @@ public class SendingService extends Service implements SendingFinishedListener{
             Log.e("=============", "error");
             new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
                     System.currentTimeMillis()), "no internet", this.getClass().toString());
+            stopService();
         }
         return START_STICKY;
     }
@@ -66,8 +67,13 @@ public class SendingService extends Service implements SendingFinishedListener{
 
     @Override
     public void sendingFinished() {
+        stopService();
+    }
+
+    private void stopService() {
         Log.e("=============", "service stopping");
         stopForeground(true);
         stopSelf();
     }
+
 }

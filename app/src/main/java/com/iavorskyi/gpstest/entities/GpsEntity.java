@@ -2,11 +2,13 @@ package com.iavorskyi.gpstest.entities;
 
 import android.location.Location;
 
+import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
+
 public class GpsEntity {
 
     private double longitude;
     private double latitude;
-    private long time;
+    private String time;
     private double accuracy;
     private double speed;
 
@@ -18,7 +20,7 @@ public class GpsEntity {
         this.latitude = location.getLatitude();
         this.accuracy = location.getAccuracy();
         this.speed = location.getSpeed();
-        this.time = location.getTime();
+        this.time = TimeAndDateUtils.colverMillisecondsToAmtTimeFormat(location.getTime());
     }
 
     public double getLongitude() {
@@ -37,14 +39,6 @@ public class GpsEntity {
         this.latitude = latitude;
     }
 
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
     public double getAccuracy() {
         return accuracy;
     }
@@ -59,5 +53,13 @@ public class GpsEntity {
 
     public void setSpeed(double speed) {
         this.speed = speed;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

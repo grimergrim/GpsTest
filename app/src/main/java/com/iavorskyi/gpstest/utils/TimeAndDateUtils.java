@@ -12,6 +12,10 @@ public class TimeAndDateUtils {
         return simpleDateFormat.format(calendar.getTime());
     }
 
+    public static String colverMillisecondsToAmtTimeFormat(long timeInMillis) {
+        return "/Date(" + timeInMillis + ")/";
+    }
+
     String getCurrentTimeForFileName() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
         Calendar calendar = Calendar.getInstance();
