@@ -112,7 +112,7 @@ public class FileUtils {
     }
 
     public void deleteSandedData(String fileName) {
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + MAIN_FOLDER_NAME + "/" + fileName);
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + MAIN_FOLDER_NAME + "/" + COORDINATES_FOLDER + "/" + fileName);
         if (file.exists()) {
             boolean delete = file.delete();
             Log.e("=============", "deleting: " + fileName + " " + delete);

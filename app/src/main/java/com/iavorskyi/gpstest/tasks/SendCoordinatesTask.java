@@ -27,15 +27,16 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
     private FileUtils mFileUtils = new FileUtils();
     private SendingFinishedListener mSendingFinishedListener;
     private Context mContext;
+    private HttpApi mHttpApi;
 
     protected Boolean doInBackground(Void... params) {
         Map<String, List<GpsEntity>> map = mFileUtils.readFileToSend();
-        boolean sendDateToServer = sendDateToServer(map);
-        return sendDateToServer;
+        sendDateToServer(map);
+        return true;
     }
 
     protected void onPostExecute(Boolean result) {
-        Log.e("=============", "task on post: " + result);
+        Log.e("=============", "task on postExecute: ");
         if (mSendingFinishedListener != null)
             mSendingFinishedListener.sendingFinished();
     }
@@ -48,7 +49,8 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
         this.mSendingFinishedListener = listener;
     }
 
-    private boolean sendDateToServer(Map<String, List<GpsEntity>> entities) {
+    private void sendDateToServer(Map<String, List<GpsEntity>> entities) {
+        mHttpApi = RetrofitGenerator.getRetrofit(mContext);
         Log.e("=============", "task doInBackground");
         if (entities != null && entities.size() > 0) {
             Set<String> keySet = entities.keySet();
@@ -60,18 +62,16 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
                         sendCoordinatesRequestList.add(sendCoordinatesRequest);
                     }
                     if (sendCoordinatesRequestList.size() > 0) {
-                        return makeCall(fileName, sendCoordinatesRequestList);
+                        makeCall(fileName, sendCoordinatesRequestList);
                     }
                 }
             }
         }
-        return false;
     }
 
     private boolean makeCall(String fileName, List<SendCoordinatesRequest> sendCoordinatesRequestList) {
-        HttpApi httpApi = RetrofitGenerator.getRetrofit(mContext);
-        if (httpApi != null) {
-            Call<BaseResponse> sendGeoParametersCall = httpApi.sendGeoParameters(sendCoordinatesRequestList);
+        if (mHttpApi != null) {
+            Call<BaseResponse> sendGeoParametersCall = mHttpApi.sendGeoParameters(sendCoordinatesRequestList);
             try {
                 Response<BaseResponse> response = sendGeoParametersCall.execute();
                 if (response != null && response.isSuccessful() && response.body().isSuccess()) {
