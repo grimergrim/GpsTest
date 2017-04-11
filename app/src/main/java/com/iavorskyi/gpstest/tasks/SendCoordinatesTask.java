@@ -1,12 +1,14 @@
 package com.iavorskyi.gpstest.tasks;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.iavorskyi.gpstest.entities.GpsEntity;
 import com.iavorskyi.gpstest.factory.RetrofitGenerator;
 import com.iavorskyi.gpstest.rest.GpsApi;
 import com.iavorskyi.gpstest.rest.json.BaseResponse;
 import com.iavorskyi.gpstest.rest.json.SaveCoordinatesRequest;
+import com.iavorskyi.gpstest.services.SendingFinishedListener;
 import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
 
@@ -22,12 +24,24 @@ import retrofit2.Response;
 public class SendCoordinatesTask extends AsyncTask<GpsEntity, Void, Boolean> {
 
     private FileUtils mFileUtils = new FileUtils();
+    private SendingFinishedListener mSendingFinishedListener;
 
     protected Boolean doInBackground(GpsEntity... entities) {
         return sendDateToServer(mFileUtils.readFileToSend());
     }
 
+    protected void onPostExecute(Boolean result) {
+        Log.e("=============", "task on post: " + result);
+        if (mSendingFinishedListener != null)
+            mSendingFinishedListener.sendingFinished();
+    }
+
+    public void setListener(SendingFinishedListener listener) {
+        this.mSendingFinishedListener = listener;
+    }
+
     private boolean sendDateToServer(Map<String, List<GpsEntity>> entities) {
+        Log.e("=============", "task doInBackground");
         if (entities != null && entities.size() > 0) {
             Set<String> keySet = entities.keySet();
             for (String fileName : keySet) {

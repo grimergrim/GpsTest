@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.iavorskyi.gpstest.R;
 import com.iavorskyi.gpstest.tasks.SendCoordinatesTask;
@@ -14,7 +15,7 @@ import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.InternetUtils;
 import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
 
-public class SendingService extends Service {
+public class SendingService extends Service implements SendingFinishedListener{
 
     private static final int ONGOING_NOTIFICATION_ID = 151119842;
 
@@ -25,16 +26,17 @@ public class SendingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e("=============", "service starting");
         startForeground(ONGOING_NOTIFICATION_ID, buildNotification());
         if (new InternetUtils(getApplicationContext()).isInternetConnected()) {
-            new SendCoordinatesTask().execute();
+            SendCoordinatesTask sendCoordinatesTask = new SendCoordinatesTask();
+            sendCoordinatesTask.setListener(this);
+            sendCoordinatesTask.execute();
         } else {
+            Log.e("=============", "error");
             new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
                     System.currentTimeMillis()), "no internet", this.getClass().toString());
         }
-        //TODO stop service
-        //TODO hide notification after sending and deleting
-        //TODO start not sticky
         return START_STICKY;
     }
 
@@ -61,4 +63,10 @@ public class SendingService extends Service {
                 .build();
     }
 
+    @Override
+    public void sendingFinished() {
+        Log.e("=============", "service stopping");
+        stopForeground(true);
+        stopSelf();
+    }
 }
