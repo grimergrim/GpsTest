@@ -53,7 +53,6 @@ public class FileUtils {
     }
 
     private List<GpsEntity> readGpsEntitiesFromFile(File file) {
-        Log.e("=============", "start reading file");
         FileInputStream fileInputStream;
         List<GpsEntity> gpsEntityList = new ArrayList<>();
         try {
@@ -86,7 +85,6 @@ public class FileUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.e("=============", "stop reading file");
         return gpsEntityList;
     }
 
@@ -116,7 +114,10 @@ public class FileUtils {
     public void deleteSandedData(String fileName) {
         File file = new File(Environment.getExternalStorageDirectory() + "/" + MAIN_FOLDER_NAME + "/" + fileName);
         if (file.exists()) {
-            file.delete();
+            boolean delete = file.delete();
+            Log.e("=============", "deleting: " + fileName + " " + delete);
+        } else {
+            Log.e("=============", "file does not exist: " + fileName);
         }
     }
 
@@ -139,6 +140,7 @@ public class FileUtils {
                 out.close();
             }
         }
+        Log.e("=============", "wrote report: " + fileName);
     }
 
     public void writeGpsToFile(GpsEntity gpsEntity, String fileName) {

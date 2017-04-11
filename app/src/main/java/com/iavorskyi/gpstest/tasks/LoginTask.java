@@ -34,7 +34,7 @@ public class LoginTask extends AsyncTask<String, Void, Void> {
     }
 
     private void login(String login, String password) {
-        HttpApi httpApi = RetrofitGenerator.getRetrofit(mContext);
+        HttpApi httpApi = RetrofitGenerator.getRetrofitForLogin();
         Call<String> loginCall = httpApi.login(login, password);
         try {
             Response<String> response = loginCall.execute();

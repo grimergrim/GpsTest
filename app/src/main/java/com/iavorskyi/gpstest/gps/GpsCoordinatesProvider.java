@@ -78,7 +78,7 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
             parameters.put(mCoordinatesFileName, new GpsEntity(location));
             saveDataTask.execute(parameters);
             counter++;
-            if (counter >= 4){ //TODO change //SEND_COUNTER_MAX_VALUE) {
+            if (counter >= 3){ //TODO change //SEND_COUNTER_MAX_VALUE) {
                 mContext.startService(new Intent(mContext, SendingService.class));
                 mCoordinatesFileName = mFileUtils.getNewFileName();
                 counter = 0;

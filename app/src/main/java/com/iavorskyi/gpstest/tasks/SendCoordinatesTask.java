@@ -75,6 +75,7 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
             try {
                 Response<BaseResponse> response = sendGeoParametersCall.execute();
                 if (response != null && response.isSuccessful() && response.body().isSuccess()) {
+                    Log.e("=============", "data was sended: " + fileName);
                     mFileUtils.deleteSandedData(fileName);
                     mFileUtils.writeThatDataWasSanded(fileName);
                     return true;

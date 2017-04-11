@@ -3,12 +3,15 @@ package com.iavorskyi.gpstest.factory;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Base64;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.iavorskyi.gpstest.rest.HttpApi;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
@@ -27,15 +30,27 @@ public class RetrofitGenerator {
     private static final String REQUEST_ACCEPT = "Accept";
     private static final String REQUEST_ACCEPT_VALUE = "application/json";
     private static final String APP_VERSION = "4.25.0";
+    private static final String COMPANY_ID = "3700BC0B-17CC-47C9-8BCA-CD78A258A592";
     private static HttpApi sMHttpApi;
 
     public static HttpApi getRetrofit(Context context) {
         if (sMHttpApi == null && context != null) {
-            sMHttpApi = createRetrofit(getToken(context), APP_VERSION);
+            sMHttpApi = createRetrofit(getAuthHeader(getToken(context)), APP_VERSION);
         } else {
             //TODO report error
         }
         return sMHttpApi;
+    }
+
+    public static HttpApi getRetrofitForLogin() {
+        Gson gson = new GsonBuilder().setDateFormat(GSON_DATE_FORMAT).create();
+        GsonConverterFactory gsonConverterFactory = GsonConverterFactory.create(gson);
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
+        retrofitBuilder.baseUrl(BASE_URL)
+                .client(new OkHttpClient())
+                .addConverterFactory(gsonConverterFactory);
+        Retrofit retrofit = retrofitBuilder.build();
+        return retrofit.create(HttpApi.class);
     }
 
     private static HttpApi createRetrofit(final String token, final String version) {
@@ -45,6 +60,7 @@ public class RetrofitGenerator {
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
 
         long SERVICE_TIMEOUT = 30L; //seconds
+        Log.e("=============", "Creating retrofir with token" + token);
         OkHttpClient okHttpClient = okHttpBuilder.addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -72,6 +88,24 @@ public class RetrofitGenerator {
     private static String getToken(Context context) {
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return defaultSharedPreferences.getString("NewGpsTrackerToken", "");
+    }
+
+    private static String getAuthHeader(String token) {
+        String authHeader = token + "@" + COMPANY_ID;
+        authHeader = authHeader.replace("\n", "").replace("\r", "").trim();
+        byte[] data = new byte[0];
+        try {
+            data = authHeader.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            //TODO report error
+        }
+        String encodedString = Base64.encodeToString(data, Base64.DEFAULT);
+        String result = ("token " + encodedString).replace("\n", "").replace("\r", "").trim();
+        Log.e("=============", "authHeader " + authHeader);
+        Log.e("=============", "authEncoded " + encodedString);
+        Log.e("=============", "result " + result);
+        return result;
     }
 
 }
