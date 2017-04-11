@@ -4,11 +4,15 @@ import android.os.Environment;
 
 import com.iavorskyi.gpstest.entities.GpsEntity;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +38,39 @@ public class FileUtils {
 
     public Map<String, List<GpsEntity>> readFileToSend() {
         Map<String, List<GpsEntity>> gpsEntityMap = new HashMap<>();
-        //TODO implement reading
-        //TODO key = file name to delete later
+        File directoryWithCoordinates = new File(Environment.getExternalStorageDirectory() + "/"
+                + MAIN_FOLDER_NAME, COORDINATES_FOLDER);
+        if (directoryWithCoordinates.exists()) {
+            File[] listFiles = directoryWithCoordinates.listFiles();
+            for (int i = 0; i < listFiles.length; i++) {
+                File file = listFiles[i];
+                List<GpsEntity> gpsEntityList = readGpsEntitiesFromFile(file);
+                //TODO add fileName
+                gpsEntityMap.put("", gpsEntityList);
+            }
+        }
         return gpsEntityMap;
     }
+
+    private List<GpsEntity> readGpsEntitiesFromFile(File file) {
+        FileInputStream fileInputStream;
+        List<GpsEntity> gpsEntityList = new ArrayList<>();
+        try {
+            fileInputStream = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                //TODO convert to GpsEntity
+                System.out.println(line);
+            }
+            reader.close();
+            fileInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return gpsEntityList;
+    }
+
 
     public void writeErrorToFile(String time, String errorText, String details) {
         PrintWriter out = null;
@@ -88,7 +121,7 @@ public class FileUtils {
         }
     }
 
-    public void writeGpsToFile(GpsEntity gpsEntity) {
+    public void writeGpsToFile(GpsEntity gpsEntity, String fileName) {
         PrintWriter out = null;
         try {
             File path = new File(Environment.getExternalStorageDirectory() + "/"
@@ -96,8 +129,7 @@ public class FileUtils {
             if (!path.exists()) {
                 path.mkdirs();
             }
-            //TODO change file name every send interval
-            File file = new File(path, getFileName());
+            File file = new File(path, fileName);
             out = new PrintWriter(new BufferedWriter(new FileWriter(file.getAbsoluteFile(), true)));
             //TODO change time to amt format
             out.println(TIME + gpsEntity.getTime() + LATITUDE + gpsEntity.getLatitude()
@@ -113,7 +145,7 @@ public class FileUtils {
         }
     }
 
-    private String getFileName() {
+    public String getNewFileName() {
         return mTimeAndDateUtils.getCurrentTimeForFileName() + ".txt";
     }
 

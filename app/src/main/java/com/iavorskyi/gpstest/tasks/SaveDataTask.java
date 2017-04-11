@@ -5,11 +5,21 @@ import android.os.AsyncTask;
 import com.iavorskyi.gpstest.entities.GpsEntity;
 import com.iavorskyi.gpstest.utils.FileUtils;
 
-public class SaveDataTask extends AsyncTask<GpsEntity, Void, Void> {
+import java.util.Map;
+import java.util.Set;
 
-    protected Void doInBackground(GpsEntity... entities) {
-        if (entities.length > 0 && entities[0] != null)
-        new FileUtils().writeGpsToFile(entities[0]);
+public class SaveDataTask extends AsyncTask<Map<String, GpsEntity>, Void, Void> {
+
+    @SafeVarargs
+    @Override
+    protected final Void doInBackground(Map<String, GpsEntity>... params) {
+        if (params.length > 0 && params[0] != null) {
+            Set<String> keySet = params[0].keySet();
+            for (String key : keySet) {
+                GpsEntity gpsEntity = params[0].get(key);
+                new FileUtils().writeGpsToFile(gpsEntity, key);
+            }
+        }
         return null;
     }
 

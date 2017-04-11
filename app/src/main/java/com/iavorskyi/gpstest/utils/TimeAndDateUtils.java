@@ -13,7 +13,7 @@ public class TimeAndDateUtils {
     }
 
     String getCurrentTimeForFileName() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh-mm-ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         return simpleDateFormat.format(calendar.getTime());

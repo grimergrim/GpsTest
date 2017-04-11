@@ -20,6 +20,9 @@ import com.iavorskyi.gpstest.tasks.SaveDataTask;
 import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -34,11 +37,13 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
     private Context mContext;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private String mCoordinatesFileName;
 
     public GpsCoordinatesProvider(Context context) {
         mContext = context;
         mFileUtils = new FileUtils();
         mTimeAndDateUtils = new TimeAndDateUtils();
+        mCoordinatesFileName = mFileUtils.getNewFileName();
         mLastLocation = new Location("Fake provider");
         mGoogleApiClient = new GoogleApiClient.Builder(mContext)
                 .addConnectionCallbacks(this)
@@ -68,10 +73,14 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
         if (mLastLocation.getLongitude() != location.getLongitude()
                 && mLastLocation.getLatitude() != location.getLatitude()) {
             SaveDataTask saveDataTask = new SaveDataTask();
-            saveDataTask.execute(new GpsEntity(location));
+            //TODO change it. Replace map with some ather mechanism.
+            Map<String, GpsEntity> parameters = new HashMap<>();
+            parameters.put(mCoordinatesFileName, new GpsEntity(location));
+            saveDataTask.execute(parameters);
             counter++;
             if (counter >= SEND_COUNTER_MAX_VALUE) {
                 mContext.startService(new Intent(mContext, SendingService.class));
+                mCoordinatesFileName = mFileUtils.getNewFileName();
                 counter = 0;
             }
         }
