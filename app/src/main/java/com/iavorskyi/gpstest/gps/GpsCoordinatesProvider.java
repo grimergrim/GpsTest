@@ -88,11 +88,8 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
                 mContext.startService(new Intent(mContext, SendingService.class));
                 mCoordinatesFileName = mFileUtils.getNewFileName();
                 counter = 0;
-            } else if (counter >= SEND_COUNTER_MAX_VALUE && IS_NOW_SENDING) {
-                //TODO report attempt to send before previous sending finished.
             }
         }
-
     }
 
     @Override

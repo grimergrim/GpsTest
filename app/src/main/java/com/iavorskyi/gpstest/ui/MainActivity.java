@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.iavorskyi.gpstest.Constants;
 import com.iavorskyi.gpstest.R;
 import com.iavorskyi.gpstest.services.GpsTrackingService;
 
@@ -37,14 +36,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if (checkPermissions()) {
             Intent intent = new Intent(this, GpsTrackingService.class);
-            switch (v.getId()) {
-                case R.id.driver1: intent.putExtra(Constants.DRIVER_EXTRA, 1);
-                    break;
-                case R.id.driver2: intent.putExtra(Constants.DRIVER_EXTRA, 2);
-                    break;
-                case R.id.driver3: intent.putExtra(Constants.DRIVER_EXTRA, 3);
-                    break;
-            }
+            //TODO problems with this users
+//            switch (v.getId()) {
+//                case R.id.driver1: intent.putExtra(Constants.DRIVER_EXTRA, 1);
+//                    break;
+//                case R.id.driver2: intent.putExtra(Constants.DRIVER_EXTRA, 2);
+//                    break;
+//                case R.id.driver3: intent.putExtra(Constants.DRIVER_EXTRA, 3);
+//                    break;
+//            }
             startService(intent);
             finish();
         } else {

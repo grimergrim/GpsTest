@@ -26,9 +26,9 @@ public class GpsTrackingService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        CURRENT_DRIVER_ID = Constants.DRIVER_ONE_ID;
-        CURRENT_DRIVER_LOGIN = Constants.DRIVER_ONE_LOGIN;
-        CURRENT_DRIVER_PASSWORD = Constants.DRIVER_ONE_PASSWORD;
+        CURRENT_DRIVER_ID = Constants.DEFAULT_DRIVER_ID;
+        CURRENT_DRIVER_LOGIN = Constants.DEFAULT_DRIVER_LOGIN;
+        CURRENT_DRIVER_PASSWORD = Constants.DEFAULT_DRIVER_PASSWORD;
 
         mGpsCoordinatesProvider = new GpsCoordinatesProvider(this.getApplicationContext());
         mGpsCoordinatesProvider.connect();

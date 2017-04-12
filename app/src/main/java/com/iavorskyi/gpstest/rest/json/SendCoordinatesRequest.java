@@ -36,7 +36,7 @@ public class SendCoordinatesRequest {
         this.transportId = 34731;
         this.latitude = gpsEntity.getLatitude();
         this.longitude = gpsEntity.getLongitude();
-        this.averageSpeed = (double) gpsEntity.getSpeed();
+        this.instantaneousSpeed = (double) gpsEntity.getSpeed();
         this.date = String.valueOf(gpsEntity.getTime());
         this.gpsAccuracy = (double) gpsEntity.getAccuracy();
         this.gsmAccuracy = (double) gpsEntity.getAccuracy();

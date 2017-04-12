@@ -4,12 +4,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.iavorskyi.gpstest.Constants;
 import com.iavorskyi.gpstest.entities.GpsEntity;
 import com.iavorskyi.gpstest.factory.RetrofitGenerator;
 import com.iavorskyi.gpstest.rest.HttpApi;
 import com.iavorskyi.gpstest.rest.json.BaseResponse;
 import com.iavorskyi.gpstest.rest.json.SendCoordinatesRequest;
-import com.iavorskyi.gpstest.services.GpsTrackingService;
 import com.iavorskyi.gpstest.services.SendingFinishedListener;
 import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
@@ -37,7 +37,6 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
     }
 
     protected void onPostExecute(Boolean result) {
-        Log.e("=============", "task on postExecute: ");
         if (mSendingFinishedListener != null)
             mSendingFinishedListener.sendingFinished();
     }
@@ -52,14 +51,15 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
 
     private void sendDateToServer(Map<String, List<GpsEntity>> entities) {
         mHttpApi = RetrofitGenerator.getRetrofit(mContext);
-        Log.e("=============", "task doInBackground");
         if (entities != null && entities.size() > 0) {
             Set<String> keySet = entities.keySet();
             for (String fileName : keySet) {
                 if (entities.size() > 0) {
                     List<SendCoordinatesRequest> sendCoordinatesRequestList = new ArrayList<>();
                     for (GpsEntity gpsEntity : entities.get(fileName)) {
-                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity, GpsTrackingService.CURRENT_DRIVER_ID);
+                        //TODO this makes userId be null
+//                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity, GpsTrackingService.CURRENT_DRIVER_ID);
+                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity, Constants.DEFAULT_DRIVER_ID);
                         sendCoordinatesRequestList.add(sendCoordinatesRequest);
                     }
                     if (sendCoordinatesRequestList.size() > 0) {
@@ -72,13 +72,13 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
 
     private boolean makeCall(String fileName, List<SendCoordinatesRequest> sendCoordinatesRequestList) {
         if (mHttpApi != null) {
+            for (SendCoordinatesRequest sendCoordinatesRequest : sendCoordinatesRequestList) {
+                Log.e("=========", "speed: " + sendCoordinatesRequest.getInstantaneousSpeed());
+            }
             Call<BaseResponse> sendGeoParametersCall = mHttpApi.sendGeoParameters(sendCoordinatesRequestList);
             try {
                 Response<BaseResponse> response = sendGeoParametersCall.execute();
                 if (response != null && response.isSuccessful() && response.body().isSuccess()) {
-                    Log.e("=============", "Response: " + response.body());
-                    Log.e("=============", "Response success is: " + response.body().isSuccess());
-                    Log.e("=============", "data was sended: " + fileName);
                     mFileUtils.deleteSandedData(fileName);
                     mFileUtils.writeThatDataWasSanded(fileName);
                     return true;

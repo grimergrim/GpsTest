@@ -23,6 +23,9 @@ import java.util.Map;
 
 public class FileUtils {
 
+    //TODO make separate folder per user with user id in name
+    //TODO remove logging
+
     private final static String MAIN_FOLDER_NAME = "NewGpsTracking";
     private final static String COORDINATES_FOLDER = "coordinates";
     private final static String REPORTS_FOLDER_NAME = "reports";
