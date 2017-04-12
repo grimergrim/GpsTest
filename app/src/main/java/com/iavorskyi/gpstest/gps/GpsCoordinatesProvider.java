@@ -20,15 +20,18 @@ import com.iavorskyi.gpstest.tasks.SaveDataTask;
 import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    public static boolean IS_NOW_SENDING;
+
     private final static int SEND_TO_SERVER_INTERVAL = 1000 * 60 * 2;
-    private final static int UPDATE_INTERVAL = 1000 * 10;
-    private final static int FASTEST_UPDATE_INTERVAL = 1000 * 5;
+    private final static int UPDATE_INTERVAL = 1000 * 20;
+    private final static int FASTEST_UPDATE_INTERVAL = 1000 * 10;
     private final static int SEND_COUNTER_MAX_VALUE = SEND_TO_SERVER_INTERVAL / UPDATE_INTERVAL;
     private int counter = 0;
     private Location mLastLocation;
@@ -51,6 +54,7 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
                 .addApi(LocationServices.API)
                 .build();
         mLocationRequest = createLocationRequest();
+        IS_NOW_SENDING = false;
     }
 
     public void connect() {
@@ -78,10 +82,12 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
             parameters.put(mCoordinatesFileName, new GpsEntity(location));
             saveDataTask.execute(parameters);
             counter++;
-            if (counter >= SEND_COUNTER_MAX_VALUE) {
+            if (counter >= SEND_COUNTER_MAX_VALUE && !IS_NOW_SENDING) {
                 mContext.startService(new Intent(mContext, SendingService.class));
                 mCoordinatesFileName = mFileUtils.getNewFileName();
                 counter = 0;
+            } else if (counter >= SEND_COUNTER_MAX_VALUE && IS_NOW_SENDING) {
+                //TODO report attempt to send before previous sending finished.
             }
         }
 
@@ -121,6 +127,35 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return mLocationRequest;
+    }
+
+
+
+    private Double getGsmAccuracy(Double accuracy) {
+        if (accuracy != null) {
+            if (accuracy > 0) {
+                accuracy = accuracy * 2 - 113;
+                accuracy = (((accuracy * (-1) - 51) / 0.62) - 100) * (-1);
+                return accuracy < 100 ? new BigDecimal(accuracy).setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue() : 0.0;
+            }
+        }
+        return 0.0;
+    }
+
+    private Double getGpsAccuracy(Double accuracy) {
+        if (accuracy != null) {
+            if (accuracy > 0) {
+                return new BigDecimal(accuracy).setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue();
+            }
+        }
+        return 0.0;
+    }
+
+    private Double getSpeed(Double speed) {
+        if (speed > 0) {
+            return new BigDecimal(speed * 3.6).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        }
+        return 0.0;
     }
 
 }

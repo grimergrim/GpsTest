@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.iavorskyi.gpstest.R;
+import com.iavorskyi.gpstest.gps.GpsCoordinatesProvider;
 import com.iavorskyi.gpstest.tasks.SendCoordinatesTask;
 import com.iavorskyi.gpstest.ui.MainActivity;
 import com.iavorskyi.gpstest.utils.FileUtils;
@@ -27,6 +28,7 @@ public class SendingService extends Service implements SendingFinishedListener{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("=============", "service starting");
+        GpsCoordinatesProvider.IS_NOW_SENDING = true;
         startForeground(ONGOING_NOTIFICATION_ID, buildNotification());
         if (new InternetUtils(getApplicationContext()).isInternetConnected()) {
             SendCoordinatesTask sendCoordinatesTask = new SendCoordinatesTask();
@@ -71,6 +73,7 @@ public class SendingService extends Service implements SendingFinishedListener{
     }
 
     private void stopService() {
+        GpsCoordinatesProvider.IS_NOW_SENDING = false;
         Log.e("=============", "service stopping");
         stopForeground(true);
         stopSelf();
