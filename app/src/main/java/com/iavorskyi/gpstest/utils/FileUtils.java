@@ -77,11 +77,11 @@ public class FileUtils {
                             break;
                         case "lon": gpsEntity.setLongitude(Double.valueOf(parameter[1]));
                             break;
-                        case "speed": gpsEntity.setSpeed(Double.valueOf(parameter[1]));
+                        case "speed": gpsEntity.setSpeed(Float.valueOf(parameter[1]));
                             break;
                         case "time": gpsEntity.setTime(parameter[1]);
                             break;
-                        case "accuracy": gpsEntity.setAccuracy(Double.valueOf(parameter[1]));
+                        case "accuracy": gpsEntity.setAccuracy(Float.valueOf(parameter[1]));
                             break;
                     }
                 }
@@ -117,7 +117,6 @@ public class FileUtils {
             oldDate = dateFormat.parse(oldFileName);
 
         } catch (ParseException e) {
-            //TODO report error
             e.printStackTrace();
         }
         Log.e("=============", "compare dates: " + newFileName + " " + oldFileName);
@@ -125,7 +124,6 @@ public class FileUtils {
     }
 
     public void writeErrorToFile(String time, String errorText, String details) {
-        //TODO add gsm and gps accuracy and other from amt project
         PrintWriter out = null;
         try {
             File path = new File(Environment.getExternalStorageDirectory() + "/"
@@ -188,7 +186,6 @@ public class FileUtils {
             }
             File file = new File(path, fileName);
             out = new PrintWriter(new BufferedWriter(new FileWriter(file.getAbsoluteFile(), true)));
-            //TODO change time to amt format
             out.println(TIME + gpsEntity.getTime() + LATITUDE + gpsEntity.getLatitude()
                     + LONGITUDE + gpsEntity.getLongitude() + ACCURACY + gpsEntity.getAccuracy()
                     + SPEED + gpsEntity.getSpeed());

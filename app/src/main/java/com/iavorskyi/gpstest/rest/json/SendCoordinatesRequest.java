@@ -31,18 +31,15 @@ public class SendCoordinatesRequest {
     @SerializedName("Phones")
     private List<String> phonesRequest = new ArrayList<>();
 
-    public SendCoordinatesRequest(GpsEntity gpsEntity) {
-        //TODO remove hardcode later
-        userId = "3C4814A2-BB3C-4A87-BBA0-075404A5DC4A";
-        transportId = 34731;
-        latitude = gpsEntity.getLatitude();
-        longitude = gpsEntity.getLongitude();
-        averageSpeed = gpsEntity.getSpeed();
-        //TODO convert date like in amt
-        date = String.valueOf(gpsEntity.getTime());
-        //TODO add formula later
-        gpsAccuracy = gpsEntity.getAccuracy();
-        gsmAccuracy = gpsEntity.getAccuracy();
+    public SendCoordinatesRequest(GpsEntity gpsEntity, String userId) {
+        this.userId = userId;
+        this.transportId = 34731;
+        this.latitude = gpsEntity.getLatitude();
+        this.longitude = gpsEntity.getLongitude();
+        this.averageSpeed = (double) gpsEntity.getSpeed();
+        this.date = String.valueOf(gpsEntity.getTime());
+        this.gpsAccuracy = (double) gpsEntity.getAccuracy();
+        this.gsmAccuracy = (double) gpsEntity.getAccuracy();
     }
 
     public Double getLatitude() {

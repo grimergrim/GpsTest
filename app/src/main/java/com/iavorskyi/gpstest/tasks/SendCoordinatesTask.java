@@ -9,6 +9,7 @@ import com.iavorskyi.gpstest.factory.RetrofitGenerator;
 import com.iavorskyi.gpstest.rest.HttpApi;
 import com.iavorskyi.gpstest.rest.json.BaseResponse;
 import com.iavorskyi.gpstest.rest.json.SendCoordinatesRequest;
+import com.iavorskyi.gpstest.services.GpsTrackingService;
 import com.iavorskyi.gpstest.services.SendingFinishedListener;
 import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
@@ -58,7 +59,7 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
                 if (entities.size() > 0) {
                     List<SendCoordinatesRequest> sendCoordinatesRequestList = new ArrayList<>();
                     for (GpsEntity gpsEntity : entities.get(fileName)) {
-                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity);
+                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity, GpsTrackingService.CURRENT_DRIVER_ID);
                         sendCoordinatesRequestList.add(sendCoordinatesRequest);
                     }
                     if (sendCoordinatesRequestList.size() > 0) {
@@ -92,8 +93,6 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
                         System.currentTimeMillis()), "sending coordinates failed with exception", e.getMessage());
                 e.printStackTrace();
             }
-        } else {
-            //TODO report error
         }
         return false;
     }

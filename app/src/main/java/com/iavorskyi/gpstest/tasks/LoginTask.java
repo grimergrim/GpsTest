@@ -23,8 +23,6 @@ public class LoginTask extends AsyncTask<String, Void, Void> {
             String login = params[0];
             String password = params[1];
             login(login, password);
-        } else {
-            //TODO report error
         }
         return null;
     }
@@ -41,11 +39,8 @@ public class LoginTask extends AsyncTask<String, Void, Void> {
             if (response.isSuccessful() && response.body() != null && response.body().length() > 0) {
                 String token = response.body();
                 saveToken(token);
-            } else {
-                //TODO report error
             }
         } catch (IOException e) {
-            //TODO report error
             e.printStackTrace();
         }
     }
@@ -56,8 +51,6 @@ public class LoginTask extends AsyncTask<String, Void, Void> {
             SharedPreferences.Editor editor = defaultSharedPreferences.edit();
             editor.putString("NewGpsTrackerToken", token);
             editor.apply();
-        } else {
-            //TODO report error
         }
     }
 

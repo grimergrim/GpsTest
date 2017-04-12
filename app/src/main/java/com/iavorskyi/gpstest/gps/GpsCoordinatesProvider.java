@@ -30,7 +30,7 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
     public static boolean IS_NOW_SENDING;
 
     private final static int SEND_TO_SERVER_INTERVAL = 1000 * 60 * 2;
-    private final static int UPDATE_INTERVAL = 1000 * 20;
+    private final static int UPDATE_INTERVAL = 1000 * 10;
     private final static int FASTEST_UPDATE_INTERVAL = 1000 * 10;
     private final static int SEND_COUNTER_MAX_VALUE = SEND_TO_SERVER_INTERVAL / UPDATE_INTERVAL;
     private int counter = 0;
@@ -74,14 +74,16 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
 
     @Override
     public void onLocationChanged(Location location) {
+        counter++;
         if (mLastLocation.getLongitude() != location.getLongitude()
                 && mLastLocation.getLatitude() != location.getLatitude()) {
+            mLastLocation = location;
             SaveDataTask saveDataTask = new SaveDataTask();
-            //TODO change it. Replace map with some ather mechanism.
+            location.setAccuracy(roundGpsAccuracy(location.getAccuracy()));
+            location.setSpeed(convertSpeedToKmPerHour(location.getSpeed()));
             Map<String, GpsEntity> parameters = new HashMap<>();
             parameters.put(mCoordinatesFileName, new GpsEntity(location));
             saveDataTask.execute(parameters);
-            counter++;
             if (counter >= SEND_COUNTER_MAX_VALUE && !IS_NOW_SENDING) {
                 mContext.startService(new Intent(mContext, SendingService.class));
                 mCoordinatesFileName = mFileUtils.getNewFileName();
@@ -129,33 +131,18 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
         return mLocationRequest;
     }
 
-
-
-    private Double getGsmAccuracy(Double accuracy) {
-        if (accuracy != null) {
-            if (accuracy > 0) {
-                accuracy = accuracy * 2 - 113;
-                accuracy = (((accuracy * (-1) - 51) / 0.62) - 100) * (-1);
-                return accuracy < 100 ? new BigDecimal(accuracy).setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue() : 0.0;
-            }
+    private Float roundGpsAccuracy(Float accuracy) {
+        if (accuracy != null && accuracy > 0) {
+            return new BigDecimal(accuracy).setScale(0, BigDecimal.ROUND_HALF_UP).floatValue();
         }
-        return 0.0;
+        return 0.0F;
     }
 
-    private Double getGpsAccuracy(Double accuracy) {
-        if (accuracy != null) {
-            if (accuracy > 0) {
-                return new BigDecimal(accuracy).setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue();
-            }
+    private Float convertSpeedToKmPerHour(Float speedInMetersPerSecond) {
+        if (speedInMetersPerSecond != null && speedInMetersPerSecond > 0) {
+            return new BigDecimal(speedInMetersPerSecond * 3.6).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
         }
-        return 0.0;
-    }
-
-    private Double getSpeed(Double speed) {
-        if (speed > 0) {
-            return new BigDecimal(speed * 3.6).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-        }
-        return 0.0;
+        return 0.0F;
     }
 
 }

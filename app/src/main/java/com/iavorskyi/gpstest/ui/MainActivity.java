@@ -4,11 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
-import com.iavorskyi.gpstest.services.GpsTrackingService;
+import com.iavorskyi.gpstest.Constants;
 import com.iavorskyi.gpstest.R;
+import com.iavorskyi.gpstest.services.GpsTrackingService;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,11 +20,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (checkPermissions()) {
-            Intent intent = new Intent(this, GpsTrackingService.class);
-            startService(intent);
-        }
-        finish();
+        Button driver1Button = (Button) findViewById(R.id.driver1);
+        Button driver2Button = (Button) findViewById(R.id.driver2);
+        Button driver3Button = (Button) findViewById(R.id.driver3);
+        driver1Button.setOnClickListener(this);
+        driver2Button.setOnClickListener(this);
+        driver3Button.setOnClickListener(this);
     }
 
     public boolean checkPermissions() {
@@ -28,4 +33,22 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public void onClick(View v) {
+        if (checkPermissions()) {
+            Intent intent = new Intent(this, GpsTrackingService.class);
+            switch (v.getId()) {
+                case R.id.driver1: intent.putExtra(Constants.DRIVER_EXTRA, 1);
+                    break;
+                case R.id.driver2: intent.putExtra(Constants.DRIVER_EXTRA, 2);
+                    break;
+                case R.id.driver3: intent.putExtra(Constants.DRIVER_EXTRA, 3);
+                    break;
+            }
+            startService(intent);
+            finish();
+        } else {
+            Toast.makeText(getApplicationContext(), "We have no permissions!!", Toast.LENGTH_LONG).show();
+        }
+    }
 }
