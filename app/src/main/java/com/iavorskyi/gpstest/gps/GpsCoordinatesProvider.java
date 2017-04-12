@@ -27,6 +27,7 @@ import java.util.Map;
 public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    //TODO скоріше всього логіка завязана на це поле не працює, бо сетиться воно з різних процесів. З цього і з процесу відправки
     public static boolean IS_NOW_SENDING;
 
     private final static int SEND_TO_SERVER_INTERVAL = 1000 * 60 * 2;
