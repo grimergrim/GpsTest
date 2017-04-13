@@ -2,9 +2,11 @@ package com.iavorskyi.gpstest.gps;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -26,9 +28,6 @@ import java.util.Map;
 
 public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
-
-    //TODO скоріше всього логіка завязана на це поле не працює, бо сетиться воно з різних процесів. З цього і з процесу відправки
-    public static boolean IS_NOW_SENDING;
 
     private final static int SEND_TO_SERVER_INTERVAL = 1000 * 60 * 2;
     private final static int UPDATE_INTERVAL = 1000 * 10;
@@ -55,27 +54,33 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
                 .addApi(LocationServices.API)
                 .build();
         mLocationRequest = createLocationRequest();
-        IS_NOW_SENDING = false;
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+        editor.putBoolean("IS_NOW_SENDING", false);
+        editor.commit();
     }
 
     public void connect() {
         if (mGoogleApiClient != null)
+            mFileUtils.writeLogToFile("GpsProvider", "Connecting to gps");
             mGoogleApiClient.connect();
     }
 
     public void disconnect() {
         if (mGoogleApiClient != null)
+            mFileUtils.writeLogToFile("GpsProvider", "Disconnecting from gps");
             mGoogleApiClient.disconnect();
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         startLocationUpdates();
+        mFileUtils.writeLogToFile("GpsProvider", "Connection to gps established");
     }
 
     @Override
     public void onLocationChanged(Location location) {
         counter++;
+        boolean is_now_sending = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("IS_NOW_SENDING", false);
         if (mLastLocation.getLongitude() != location.getLongitude()
                 && mLastLocation.getLatitude() != location.getLatitude()) {
             mLastLocation = location;
@@ -85,27 +90,27 @@ public class GpsCoordinatesProvider implements GoogleApiClient.ConnectionCallbac
             Map<String, GpsEntity> parameters = new HashMap<>();
             parameters.put(mCoordinatesFileName, new GpsEntity(location));
             saveDataTask.execute(parameters);
-            if (counter >= SEND_COUNTER_MAX_VALUE && !IS_NOW_SENDING) {
+            if (counter >= SEND_COUNTER_MAX_VALUE && !is_now_sending) {
                 mContext.startService(new Intent(mContext, SendingService.class));
                 mCoordinatesFileName = mFileUtils.getNewFileName();
                 counter = 0;
             }
+        } else {
+            mFileUtils.writeLogToFile("GpsProvider", "We got same location");
         }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         if (mFileUtils != null && mTimeAndDateUtils != null) {
-            mFileUtils.writeErrorToFile(mTimeAndDateUtils.getDateAsStringFromSystemTime(System
-                    .currentTimeMillis()), "connection to gps suspended", this.getClass().toString());
+            mFileUtils.writeLogToFile("connection to gps suspended", this.getClass().toString());
         }
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         if (mFileUtils != null && mTimeAndDateUtils != null) {
-            mFileUtils.writeErrorToFile(mTimeAndDateUtils.getDateAsStringFromSystemTime(System
-                    .currentTimeMillis()), "connection to gps failed", this.getClass().toString());
+            mFileUtils.writeLogToFile("connection to gps failed", this.getClass().toString());
         }
     }
 

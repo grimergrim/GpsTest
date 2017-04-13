@@ -18,32 +18,42 @@
 
     <Button
         android:id="@+id/driver1"
-        android:layout_width="200dp"
-        android:layout_height="80dp"
+        android:layout_width="280dp"
+        android:layout_height="90dp"
         android:layout_margin="20dp"
         android:background="@android:color/holo_blue_dark"
-        android:text="КОЗУБ"
+        android:text="Поліщук\nd5c99607-3913-4325-a0b2-3912426f3ee7"
         android:textColor="@android:color/white"
-        android:textSize="30sp"/>
+        android:textSize="20sp"/>
 
     <Button
         android:id="@+id/driver2"
-        android:layout_width="200dp"
-        android:layout_height="80dp"
+        android:layout_width="280dp"
+        android:layout_height="90dp"
         android:layout_margin="20dp"
         android:background="@android:color/holo_blue_dark"
-        android:text="ЧЕРЕП"
+        android:text="Сладкевич\n4d70beb2-87e2-4719-8f5b-39e0dc55f7aa"
         android:textColor="@android:color/white"
-        android:textSize="30sp"/>
+        android:textSize="20sp"/>
 
     <Button
         android:id="@+id/driver3"
-        android:layout_width="200dp"
-        android:layout_height="80dp"
+        android:layout_width="280dp"
+        android:layout_height="90dp"
         android:layout_margin="20dp"
         android:background="@android:color/holo_blue_dark"
-        android:text="КУЧЕР"
+        android:text="Куташевський\n8dfb1e40-5392-4e6b-b62a-023cb5f2dcc3"
         android:textColor="@android:color/white"
-        android:textSize="30sp"/>
+        android:textSize="20sp"/>
+
+    <Button
+        android:id="@+id/driver4"
+        android:layout_width="280dp"
+        android:layout_height="90dp"
+        android:layout_margin="20dp"
+        android:background="@android:color/holo_blue_dark"
+        android:text="Колот\n3C4814A2-BB3C-4A87-BBA0-075404A5DC4A"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"/>
 
 </LinearLayout>

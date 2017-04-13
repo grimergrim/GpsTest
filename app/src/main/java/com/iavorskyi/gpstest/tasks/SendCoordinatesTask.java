@@ -2,9 +2,8 @@ package com.iavorskyi.gpstest.tasks;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.preference.PreferenceManager;
 
-import com.iavorskyi.gpstest.Constants;
 import com.iavorskyi.gpstest.entities.GpsEntity;
 import com.iavorskyi.gpstest.factory.RetrofitGenerator;
 import com.iavorskyi.gpstest.rest.HttpApi;
@@ -12,7 +11,6 @@ import com.iavorskyi.gpstest.rest.json.BaseResponse;
 import com.iavorskyi.gpstest.rest.json.SendCoordinatesRequest;
 import com.iavorskyi.gpstest.services.SendingFinishedListener;
 import com.iavorskyi.gpstest.utils.FileUtils;
-import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,15 +49,15 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
 
     private void sendDateToServer(Map<String, List<GpsEntity>> entities) {
         mHttpApi = RetrofitGenerator.getRetrofit(mContext);
+        String driverId = PreferenceManager.getDefaultSharedPreferences(mContext).getString("driverId", null);
+        int transportId = PreferenceManager.getDefaultSharedPreferences(mContext).getInt("transportId", 11111);
         if (entities != null && entities.size() > 0) {
             Set<String> keySet = entities.keySet();
             for (String fileName : keySet) {
                 if (entities.size() > 0) {
                     List<SendCoordinatesRequest> sendCoordinatesRequestList = new ArrayList<>();
                     for (GpsEntity gpsEntity : entities.get(fileName)) {
-                        //TODO this makes userId be null
-//                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity, GpsTrackingService.CURRENT_DRIVER_ID);
-                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity, Constants.DEFAULT_DRIVER_ID);
+                        SendCoordinatesRequest sendCoordinatesRequest = new SendCoordinatesRequest(gpsEntity, driverId, transportId);
                         sendCoordinatesRequestList.add(sendCoordinatesRequest);
                     }
                     if (sendCoordinatesRequestList.size() > 0) {
@@ -73,7 +71,6 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
     private boolean makeCall(String fileName, List<SendCoordinatesRequest> sendCoordinatesRequestList) {
         if (mHttpApi != null) {
             for (SendCoordinatesRequest sendCoordinatesRequest : sendCoordinatesRequestList) {
-                Log.e("=========", "speed: " + sendCoordinatesRequest.getInstantaneousSpeed());
             }
             Call<BaseResponse> sendGeoParametersCall = mHttpApi.sendGeoParameters(sendCoordinatesRequestList);
             try {
@@ -84,13 +81,11 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
                     return true;
                 } else {
                     if (response != null) {
-                        new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
-                                System.currentTimeMillis()), "sending coordinates failed", response.errorBody().toString());
+                        new FileUtils().writeLogToFile("sending coordinates failed", response.errorBody().toString());
                     }
                 }
             } catch (IOException e) {
-                new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
-                        System.currentTimeMillis()), "sending coordinates failed with exception", e.getMessage());
+                new FileUtils().writeLogToFile("sending coordinates failed with exception", e.getMessage());
                 e.printStackTrace();
             }
         }

@@ -4,31 +4,35 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.iavorskyi.gpstest.R;
-import com.iavorskyi.gpstest.gps.GpsCoordinatesProvider;
 import com.iavorskyi.gpstest.tasks.SendCoordinatesTask;
 import com.iavorskyi.gpstest.ui.MainActivity;
 import com.iavorskyi.gpstest.utils.FileUtils;
 import com.iavorskyi.gpstest.utils.InternetUtils;
-import com.iavorskyi.gpstest.utils.TimeAndDateUtils;
 
 public class SendingService extends Service implements SendingFinishedListener{
 
     private static final int ONGOING_NOTIFICATION_ID = 151119842;
+    private FileUtils mFileUtils;
 
     @Override
     public void onCreate() {
+        mFileUtils = new FileUtils();
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("=============", "service starting");
-        GpsCoordinatesProvider.IS_NOW_SENDING = true;
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+        editor.putBoolean("IS_NOW_SENDING", true);
+        editor.commit();
+        mFileUtils.writeLogToFile("Sending service started", "");
         startForeground(ONGOING_NOTIFICATION_ID, buildNotification());
         if (new InternetUtils(getApplicationContext()).isInternetConnected()) {
             SendCoordinatesTask sendCoordinatesTask = new SendCoordinatesTask();
@@ -37,8 +41,7 @@ public class SendingService extends Service implements SendingFinishedListener{
             sendCoordinatesTask.execute();
         } else {
             Log.e("=============", "error");
-            new FileUtils().writeErrorToFile(new TimeAndDateUtils().getDateAsStringFromSystemTime(
-                    System.currentTimeMillis()), "no internet", this.getClass().toString());
+            new FileUtils().writeLogToFile("no internet", this.getClass().toString());
             stopService();
         }
         return START_STICKY;
@@ -52,6 +55,7 @@ public class SendingService extends Service implements SendingFinishedListener{
 
     @Override
     public void onDestroy() {
+        mFileUtils.writeLogToFile("Sending service destroyed", "");
         super.onDestroy();
     }
 
@@ -69,11 +73,14 @@ public class SendingService extends Service implements SendingFinishedListener{
 
     @Override
     public void sendingFinished() {
+        mFileUtils.writeLogToFile("Sending service finished its work", "");
         stopService();
     }
 
     private void stopService() {
-        GpsCoordinatesProvider.IS_NOW_SENDING = false;
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+        editor.putBoolean("IS_NOW_SENDING", false);
+        editor.commit();
         Log.e("=============", "service stopping");
         stopForeground(true);
         stopSelf();

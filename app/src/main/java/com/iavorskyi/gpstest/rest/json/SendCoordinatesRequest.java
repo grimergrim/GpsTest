@@ -31,9 +31,9 @@ public class SendCoordinatesRequest {
     @SerializedName("Phones")
     private List<String> phonesRequest = new ArrayList<>();
 
-    public SendCoordinatesRequest(GpsEntity gpsEntity, String userId) {
+    public SendCoordinatesRequest(GpsEntity gpsEntity, String userId, int transportId) {
         this.userId = userId;
-        this.transportId = 34731;
+        this.transportId = transportId;
         this.latitude = gpsEntity.getLatitude();
         this.longitude = gpsEntity.getLongitude();
         this.instantaneousSpeed = (double) gpsEntity.getSpeed();

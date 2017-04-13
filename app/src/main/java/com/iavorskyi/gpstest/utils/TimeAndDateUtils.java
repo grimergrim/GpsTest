@@ -5,7 +5,7 @@ import java.util.Calendar;
 
 public class TimeAndDateUtils {
 
-    public String getDateAsStringFromSystemTime(long timeInMillis) {
+    String getDateAsStringFromSystemTime(long timeInMillis) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timeInMillis);

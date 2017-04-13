@@ -1,7 +1,6 @@
 package com.iavorskyi.gpstest.utils;
 
 import android.os.Environment;
-import android.util.Log;
 
 import com.iavorskyi.gpstest.entities.GpsEntity;
 
@@ -23,14 +22,13 @@ import java.util.Map;
 
 public class FileUtils {
 
-    //TODO make separate folder per user with user id in name
-    //TODO remove logging
+    //TODO make separate folder per user with user id as name
 
     private final static String MAIN_FOLDER_NAME = "NewGpsTracking";
     private final static String COORDINATES_FOLDER = "coordinates";
     private final static String REPORTS_FOLDER_NAME = "reports";
     private final static String SUCCESS_FILE_NAME = "success.txt";
-    private final static String ERRORS_FILE_NAME = "errors.txt";
+    private final static String LOGS_FILE_NAME = "log.txt";
     private final static String TIME = "time:";
     private final static String LATITUDE = ";lat:";
     private final static String LONGITUDE = ";lon:";
@@ -122,11 +120,10 @@ public class FileUtils {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Log.e("=============", "compare dates: " + newFileName + " " + oldFileName);
         return newDate.getTime() > oldDate.getTime();
     }
 
-    public void writeErrorToFile(String time, String errorText, String details) {
+    public void writeLogToFile(String logText, String details) {
         PrintWriter out = null;
         try {
             File path = new File(Environment.getExternalStorageDirectory() + "/"
@@ -134,9 +131,9 @@ public class FileUtils {
             if (!path.exists()) {
                 path.mkdirs();
             }
-            File file = new File(path, ERRORS_FILE_NAME);
+            File file = new File(path, LOGS_FILE_NAME);
             out = new PrintWriter(new BufferedWriter(new FileWriter(file.getAbsoluteFile(), true)));
-            out.println(mTimeAndDateUtils.getDateAsStringFromSystemTime(System.currentTimeMillis()) + " " + errorText + " " + details);
+            out.println(mTimeAndDateUtils.getDateAsStringFromSystemTime(System.currentTimeMillis()) + " " + logText + " " + details);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -150,10 +147,7 @@ public class FileUtils {
     public void deleteSandedData(String fileName) {
         File file = new File(Environment.getExternalStorageDirectory() + "/" + MAIN_FOLDER_NAME + "/" + COORDINATES_FOLDER + "/" + fileName);
         if (file.exists()) {
-            boolean delete = file.delete();
-            Log.e("=============", "deleting: " + fileName + " " + delete);
-        } else {
-            Log.e("=============", "file does not exist: " + fileName);
+            file.delete();
         }
     }
 
@@ -176,7 +170,6 @@ public class FileUtils {
                 out.close();
             }
         }
-        Log.e("=============", "wrote report: " + fileName);
     }
 
     public void writeGpsToFile(GpsEntity gpsEntity, String fileName) {

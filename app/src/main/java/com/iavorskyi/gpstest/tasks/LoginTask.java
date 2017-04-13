@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 
 import com.iavorskyi.gpstest.factory.RetrofitGenerator;
 import com.iavorskyi.gpstest.rest.HttpApi;
+import com.iavorskyi.gpstest.utils.FileUtils;
 
 import java.io.IOException;
 
@@ -16,6 +17,7 @@ import retrofit2.Response;
 public class LoginTask extends AsyncTask<String, Void, Void> {
 
     private Context mContext;
+    private FileUtils mFileUtils = new FileUtils();
 
     @Override
     protected Void doInBackground(String... params) {
@@ -39,9 +41,12 @@ public class LoginTask extends AsyncTask<String, Void, Void> {
             if (response.isSuccessful() && response.body() != null && response.body().length() > 0) {
                 String token = response.body();
                 saveToken(token);
+            } else {
+                mFileUtils.writeLogToFile("Login failed", response.errorBody().string());
             }
         } catch (IOException e) {
             e.printStackTrace();
+            mFileUtils.writeLogToFile("Login exception.", e.getMessage());
         }
     }
 
@@ -51,6 +56,8 @@ public class LoginTask extends AsyncTask<String, Void, Void> {
             SharedPreferences.Editor editor = defaultSharedPreferences.edit();
             editor.putString("NewGpsTrackerToken", token);
             editor.apply();
+        } else {
+            mFileUtils.writeLogToFile("Token wasn't saved. Context is null", "");
         }
     }
 
