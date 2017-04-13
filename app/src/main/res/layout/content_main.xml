@@ -22,7 +22,7 @@
         android:layout_height="90dp"
         android:layout_margin="20dp"
         android:background="@android:color/holo_blue_dark"
-        android:text="Поліщук\nd5c99607-3913-4325-a0b2-3912426f3ee7"
+        android:text="хтось ще Поліщук\nd5c99607-3913-4325-a0b2-3912426f3ee7"
         android:textColor="@android:color/white"
         android:textSize="20sp"/>
 
@@ -32,7 +32,7 @@
         android:layout_height="90dp"
         android:layout_margin="20dp"
         android:background="@android:color/holo_blue_dark"
-        android:text="Сладкевич\n4d70beb2-87e2-4719-8f5b-39e0dc55f7aa"
+        android:text="Володя Сладкевич\n4d70beb2-87e2-4719-8f5b-39e0dc55f7aa"
         android:textColor="@android:color/white"
         android:textSize="20sp"/>
 
@@ -42,7 +42,7 @@
         android:layout_height="90dp"
         android:layout_margin="20dp"
         android:background="@android:color/holo_blue_dark"
-        android:text="Куташевський\n8dfb1e40-5392-4e6b-b62a-023cb5f2dcc3"
+        android:text="Марина Куташевський\n8dfb1e40-5392-4e6b-b62a-023cb5f2dcc3"
         android:textColor="@android:color/white"
         android:textSize="20sp"/>
 
@@ -52,7 +52,7 @@
         android:layout_height="90dp"
         android:layout_margin="20dp"
         android:background="@android:color/holo_blue_dark"
-        android:text="Колот\n3C4814A2-BB3C-4A87-BBA0-075404A5DC4A"
+        android:text="Оксана Колот\n3C4814A2-BB3C-4A87-BBA0-075404A5DC4A"
         android:textColor="@android:color/white"
         android:textSize="20sp"/>
 

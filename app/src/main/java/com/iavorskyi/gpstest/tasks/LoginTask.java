@@ -42,7 +42,7 @@ public class LoginTask extends AsyncTask<String, Void, Void> {
                 String token = response.body();
                 saveToken(token);
             } else {
-                mFileUtils.writeLogToFile("Login failed", response.errorBody().string());
+                mFileUtils.writeLogToFile("Login failed", "");
             }
         } catch (IOException e) {
             e.printStackTrace();
