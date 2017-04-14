@@ -70,8 +70,6 @@ public class SendCoordinatesTask extends AsyncTask<Void, Void, Boolean> {
 
     private boolean makeCall(String fileName, List<SendCoordinatesRequest> sendCoordinatesRequestList) {
         if (mHttpApi != null) {
-            for (SendCoordinatesRequest sendCoordinatesRequest : sendCoordinatesRequestList) {
-            }
             Call<BaseResponse> sendGeoParametersCall = mHttpApi.sendGeoParameters(sendCoordinatesRequestList);
             try {
                 Response<BaseResponse> response = sendGeoParametersCall.execute();
