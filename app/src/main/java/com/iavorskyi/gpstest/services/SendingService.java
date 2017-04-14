@@ -20,9 +20,11 @@ public class SendingService extends Service implements SendingFinishedListener{
 
     private static final int ONGOING_NOTIFICATION_ID = 151119842;
     private FileUtils mFileUtils;
+    private boolean is_now_sending;
 
     @Override
     public void onCreate() {
+        is_now_sending = true;
         mFileUtils = new FileUtils();
         super.onCreate();
     }
@@ -34,16 +36,20 @@ public class SendingService extends Service implements SendingFinishedListener{
         editor.commit();
         mFileUtils.writeLogToFile("Sending service started", "");
         startForeground(ONGOING_NOTIFICATION_ID, buildNotification());
-        if (new InternetUtils(getApplicationContext()).isInternetConnected()) {
-            SendCoordinatesTask sendCoordinatesTask = new SendCoordinatesTask();
-            sendCoordinatesTask.setListener(this);
-            sendCoordinatesTask.setContext(getApplicationContext());
-            sendCoordinatesTask.execute();
+        if (!is_now_sending) {
+            if (new InternetUtils(getApplicationContext()).isInternetConnected()) {
+                SendCoordinatesTask sendCoordinatesTask = new SendCoordinatesTask();
+                sendCoordinatesTask.setListener(this);
+                sendCoordinatesTask.setContext(getApplicationContext());
+                sendCoordinatesTask.execute();
+            } else {
+                new FileUtils().writeLogToFile("no internet", this.getClass().toString());
+                stopService();
+            }
         } else {
-            Log.e("=============", "error");
-            new FileUtils().writeLogToFile("no internet", this.getClass().toString());
-            stopService();
+            new FileUtils().writeLogToFile("Trying to send when sending.", this.getClass().toString());
         }
+
         return START_STICKY;
     }
 
@@ -55,6 +61,7 @@ public class SendingService extends Service implements SendingFinishedListener{
 
     @Override
     public void onDestroy() {
+        is_now_sending = false;
         mFileUtils.writeLogToFile("Sending service destroyed", "");
         super.onDestroy();
     }
